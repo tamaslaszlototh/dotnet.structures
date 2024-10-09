@@ -21,6 +21,7 @@ namespace DotNet.DataStructures.PriorityQueues;
 public sealed class BinaryMinHeap
 {
     private readonly List<PriorityQueueItem> _items = [];
+    private readonly Dictionary<object, int> _hashMap = [];
 
     private BinaryMinHeap()
     {
@@ -30,6 +31,22 @@ public sealed class BinaryMinHeap
     {
         return new BinaryMinHeap();
     }
+    
+    private void UpdateHashMap(object value, int newIndex)
+    {
+        _hashMap[value] = newIndex;
+    }
+    
+    private void DeleteFromHashMap(object value)
+    {
+        _hashMap.Remove(value);
+    }
+
+    private int GetIndexFromHashMap(object value)
+    {
+        var isFound = _hashMap.TryGetValue(value, out int index);
+        return isFound ? index : -1;
+    }
 
     private void BubbleUp(int index)
     {
@@ -38,10 +55,12 @@ public sealed class BinaryMinHeap
         {
             var parentIndex = GetParentIndex(index);
             if (_items[parentIndex].Priority < current.Priority) break;
+            UpdateHashMap(_items[parentIndex].Value, index);
             _items[index] = _items[parentIndex];
             index = parentIndex;
         }
 
+        UpdateHashMap(current.Value, index);
         _items[index] = current;
     }
 
@@ -52,10 +71,12 @@ public sealed class BinaryMinHeap
         {
             var highestPriorityChild = GetHighestPriorityChild(index);
             if (highestPriorityChild.Child.Priority > current.Priority) break;
+            UpdateHashMap(highestPriorityChild.Child.Value, index);
             _items[index] = highestPriorityChild.Child;
             index = highestPriorityChild.Index;
         }
 
+        UpdateHashMap(current.Value, index);
         _items[index] = current;
     }
 
@@ -92,6 +113,7 @@ public sealed class BinaryMinHeap
     public void Insert(PriorityQueueItem item)
     {
         _items.Add(item);
+        UpdateHashMap(item.Value, _items.Count - 1);
         BubbleUp(_items.IndexOf(item));
     }
 
@@ -118,6 +140,7 @@ public sealed class BinaryMinHeap
     {
         var lastItem = _items.Last();
         _items.Remove(lastItem);
+        DeleteFromHashMap(lastItem.Value);
         return lastItem;
     }
 
@@ -152,8 +175,7 @@ public sealed class BinaryMinHeap
 
     private int GetIndex(PriorityQueueItem item)
     {
-        var foundItem = _items.FirstOrDefault(i => i.Value.Equals(item.Value));
-        return foundItem is null ? -1 : _items.IndexOf(foundItem);
+        return GetIndexFromHashMap(item.Value);
     }
 
     /// <summary>
