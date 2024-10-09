@@ -6,15 +6,17 @@ namespace DotNet.Structures.Tests.PriorityQueuesTests;
 public class BinaryMaxHeapTests
 {
     private BinaryMaxHeap _heap;
+    private BinaryMaxHeap _heapWithHashMapDisabled;
 
     [SetUp]
     public void SetUp()
     {
         _heap = BinaryMaxHeap.Create();
+        _heapWithHashMapDisabled = BinaryMaxHeap.Create(options => options.DisableHashMap());
     }
 
     [Test]
-    public void Insert_ShouldAddNewItemToHeap()
+    public void Insert_ShouldAddNewItemToHeap_WithHashMap()
     {
         // Arrange
         var item = PriorityQueueItem.Create(10, "Item1");
@@ -28,7 +30,21 @@ public class BinaryMaxHeapTests
     }
 
     [Test]
-    public void Top_ShouldReturnAndRemoveHighestPriorityItem()
+    public void Insert_ShouldAddNewItemToHeap_WithoutHashMap()
+    {
+        // Arrange
+        var item = PriorityQueueItem.Create(10, "Item1");
+
+        // Act
+        _heapWithHashMapDisabled.Insert(item);
+
+        // Assert
+        Assert.That(_heapWithHashMapDisabled.Count, Is.EqualTo(1));
+        Assert.That(_heapWithHashMapDisabled.Peek(), Is.EqualTo(item));
+    }
+
+    [Test]
+    public void Top_ShouldReturnAndRemoveHighestPriorityItem_WithHashMap()
     {
         // Arrange
         _heap.Insert(PriorityQueueItem.Create(5, "LowPriority"));
@@ -44,7 +60,23 @@ public class BinaryMaxHeapTests
     }
 
     [Test]
-    public void Peek_ShouldReturnHighestPriorityItemWithoutRemovingIt()
+    public void Top_ShouldReturnAndRemoveHighestPriorityItem_WithoutHashMap()
+    {
+        // Arrange
+        _heapWithHashMapDisabled.Insert(PriorityQueueItem.Create(5, "LowPriority"));
+        var highPriorityItem = PriorityQueueItem.Create(20, "HighPriority");
+        _heapWithHashMapDisabled.Insert(highPriorityItem);
+
+        // Act
+        var topItem = _heapWithHashMapDisabled.Top();
+
+        // Assert
+        Assert.That(highPriorityItem, Is.EqualTo(topItem));
+        Assert.That(_heapWithHashMapDisabled.Count(), Is.EqualTo(1));
+    }
+
+    [Test]
+    public void Peek_ShouldReturnHighestPriorityItemWithoutRemovingIt_WithHashMap()
     {
         // Arrange
         var item1 = PriorityQueueItem.Create(15, "Item1");
@@ -61,7 +93,24 @@ public class BinaryMaxHeapTests
     }
 
     [Test]
-    public void Update_ShouldModifyPriorityOfExistingItem()
+    public void Peek_ShouldReturnHighestPriorityItemWithoutRemovingIt_WithoutHashMap()
+    {
+        // Arrange
+        var item1 = PriorityQueueItem.Create(15, "Item1");
+        var item2 = PriorityQueueItem.Create(30, "Item2");
+        _heapWithHashMapDisabled.Insert(item1);
+        _heapWithHashMapDisabled.Insert(item2);
+
+        // Act
+        var topItem = _heapWithHashMapDisabled.Peek();
+
+        // Assert
+        Assert.That(item2, Is.EqualTo(topItem));
+        Assert.That(_heapWithHashMapDisabled.Count(), Is.EqualTo(2));
+    }
+
+    [Test]
+    public void Update_ShouldModifyPriorityOfExistingItem_WithHashMap()
     {
         // Arrange
         var item = PriorityQueueItem.Create(5, "Item1");
@@ -77,7 +126,23 @@ public class BinaryMaxHeapTests
     }
 
     [Test]
-    public void Update_ShouldInsertNewItemIfItDoesNotExist()
+    public void Update_ShouldModifyPriorityOfExistingItem_WithoutHashMap()
+    {
+        // Arrange
+        var item = PriorityQueueItem.Create(5, "Item1");
+        _heapWithHashMapDisabled.Insert(item);
+        var updatedItem = PriorityQueueItem.Create(25, "Item1");
+
+        // Act
+        _heapWithHashMapDisabled.Update(updatedItem);
+
+        // Assert
+        Assert.That(_heapWithHashMapDisabled.Peek(), Is.EqualTo(updatedItem));
+        Assert.That(_heapWithHashMapDisabled.Peek().Priority, Is.EqualTo(25));
+    }
+
+    [Test]
+    public void Update_ShouldInsertNewItemIfItDoesNotExist_WithHashMap()
     {
         // Arrange
         var newItem = PriorityQueueItem.Create(50, "NewItem");
@@ -91,7 +156,21 @@ public class BinaryMaxHeapTests
     }
 
     [Test]
-    public void Top_ShouldReturnNullWhenHeapIsEmpty()
+    public void Update_ShouldInsertNewItemIfItDoesNotExist_WithoutHashMap()
+    {
+        // Arrange
+        var newItem = PriorityQueueItem.Create(50, "NewItem");
+
+        // Act
+        _heapWithHashMapDisabled.Update(newItem);
+
+        // Assert
+        Assert.That(_heapWithHashMapDisabled.Peek(), Is.EqualTo(newItem));
+        Assert.That(_heapWithHashMapDisabled.Count(), Is.EqualTo(1));
+    }
+
+    [Test]
+    public void Top_ShouldReturnNullWhenHeapIsEmpty_WithHashMap()
     {
         // Act
         var result = _heap.Top();
@@ -101,7 +180,17 @@ public class BinaryMaxHeapTests
     }
 
     [Test]
-    public void Peek_ShouldReturnNullWhenHeapIsEmpty()
+    public void Top_ShouldReturnNullWhenHeapIsEmpty_WithoutHashMap()
+    {
+        // Act
+        var result = _heapWithHashMapDisabled.Top();
+
+        // Assert
+        Assert.That(result, Is.Null);
+    }
+
+    [Test]
+    public void Peek_ShouldReturnNullWhenHeapIsEmpty_WithHashMap()
     {
         // Act
         var result = _heap.Peek();
@@ -111,7 +200,17 @@ public class BinaryMaxHeapTests
     }
 
     [Test]
-    public void Insert_ShouldMaintainHeapProperty()
+    public void Peek_ShouldReturnNullWhenHeapIsEmpty_WithoutHashMap()
+    {
+        // Act
+        var result = _heapWithHashMapDisabled.Peek();
+
+        // Assert
+        Assert.That(result, Is.Null);
+    }
+
+    [Test]
+    public void Insert_ShouldMaintainHeapProperty_WithHashMap()
     {
         // Arrange
         _heap.Insert(PriorityQueueItem.Create(5, "Item1"));
@@ -127,7 +226,23 @@ public class BinaryMaxHeapTests
     }
 
     [Test]
-    public void Insert_MultipleItems_ShouldArrangeItemsAccordingToPriority()
+    public void Insert_ShouldMaintainHeapProperty_WithoutHashMap()
+    {
+        // Arrange
+        _heapWithHashMapDisabled.Insert(PriorityQueueItem.Create(5, "Item1"));
+        _heapWithHashMapDisabled.Insert(PriorityQueueItem.Create(10, "Item2"));
+        _heapWithHashMapDisabled.Insert(PriorityQueueItem.Create(15, "Item3"));
+
+        // Act
+        var topItem = _heapWithHashMapDisabled.Peek();
+
+        // Assert
+        Assert.That(topItem, Is.Not.Null);
+        Assert.That(topItem.Priority, Is.EqualTo(15));
+    }
+
+    [Test]
+    public void Insert_MultipleItems_ShouldArrangeItemsAccordingToPriority_WithHashMap()
     {
         // Arrange
         var items = new[]
@@ -146,6 +261,30 @@ public class BinaryMaxHeapTests
 
         // Assert
         var topItem = _heap.Top();
+        Assert.That(topItem, Is.Not.Null);
+        Assert.That(topItem.Priority, Is.EqualTo(30));
+    }
+
+    [Test]
+    public void Insert_MultipleItems_ShouldArrangeItemsAccordingToPriority_WithoutHashMap()
+    {
+        // Arrange
+        var items = new[]
+        {
+            PriorityQueueItem.Create(10, "Item1"),
+            PriorityQueueItem.Create(30, "Item2"),
+            PriorityQueueItem.Create(20, "Item3"),
+            PriorityQueueItem.Create(25, "Item4")
+        };
+
+        // Act
+        foreach (var item in items)
+        {
+            _heapWithHashMapDisabled.Insert(item);
+        }
+
+        // Assert
+        var topItem = _heapWithHashMapDisabled.Top();
         Assert.That(topItem, Is.Not.Null);
         Assert.That(topItem.Priority, Is.EqualTo(30));
     }

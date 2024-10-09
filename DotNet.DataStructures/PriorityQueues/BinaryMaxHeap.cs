@@ -22,21 +22,53 @@ public sealed class BinaryMaxHeap
 {
     private readonly List<PriorityQueueItem> _items = [];
     private readonly Dictionary<object, int> _hashMap = [];
+    private readonly bool _isHashMapEnabled = true;
 
     private BinaryMaxHeap()
     {
     }
 
-    public static BinaryMaxHeap Create()
+    private BinaryMaxHeap(HeapOptions options)
     {
-        return new BinaryMaxHeap();
+        _isHashMapEnabled = options.IsHashMapEnabled;
+    }
+
+    /// <summary>
+    /// Creates a new instance of a <see cref="BinaryMaxHeap"/> using the provided configuration options.
+    /// </summary>
+    /// <param name="optionsBuilder">
+    /// An optional delegate used to configure the heap options. If no options are provided, 
+    /// a default <see cref="BinaryMaxHeap"/> is created with the standard heap settings.
+    /// </param>
+    /// <returns>
+    /// A new instance of <see cref="BinaryMaxHeap"/> configured according to the specified options, 
+    /// or with default options if none are provided.
+    /// </returns>
+    /// <example>
+    /// Example of creating a <see cref="BinaryMaxHeap"/> with custom options:
+    /// <code>
+    /// var heap = BinaryMaxHeap.Create(options => options.DisableHashMap());
+    /// </code>
+    /// </example>
+    /// <remarks>BinaryMaxHeap uses hashMap by default to make search faster, but this can be disabled.
+    /// </remarks>
+    public static BinaryMaxHeap Create(Action<HeapOptions>? optionsBuilder = null)
+    {
+        if (optionsBuilder is null)
+        {
+            return new BinaryMaxHeap();
+        }
+
+        var options = new HeapOptions();
+        optionsBuilder.Invoke(options);
+        return new BinaryMaxHeap(options);
     }
 
     private void UpdateHashMap(object value, int newIndex)
     {
         _hashMap[value] = newIndex;
     }
-    
+
     private void DeleteFromHashMap(object value)
     {
         _hashMap.Remove(value);
@@ -55,12 +87,15 @@ public sealed class BinaryMaxHeap
         {
             var parentIndex = GetParentIndex(index);
             if (_items[parentIndex].Priority > current.Priority) break;
-            UpdateHashMap(_items[parentIndex].Value, index);
+
+            if (_isHashMapEnabled) UpdateHashMap(_items[parentIndex].Value, index);
+
             _items[index] = _items[parentIndex];
             index = parentIndex;
         }
 
-        UpdateHashMap(current.Value, index);
+        if (_isHashMapEnabled) UpdateHashMap(current.Value, index);
+
         _items[index] = current;
     }
 
@@ -71,12 +106,15 @@ public sealed class BinaryMaxHeap
         {
             var highestPriorityChild = GetHighestPriorityChild(index);
             if (highestPriorityChild.Child.Priority < current.Priority) break;
-            UpdateHashMap(highestPriorityChild.Child.Value, index);
+
+            if (_isHashMapEnabled) UpdateHashMap(highestPriorityChild.Child.Value, index);
+
             _items[index] = highestPriorityChild.Child;
             index = highestPriorityChild.Index;
         }
 
-        UpdateHashMap(current.Value, index);
+        if (_isHashMapEnabled) UpdateHashMap(current.Value, index);
+
         _items[index] = current;
     }
 
@@ -113,7 +151,9 @@ public sealed class BinaryMaxHeap
     public void Insert(PriorityQueueItem item)
     {
         _items.Add(item);
-        UpdateHashMap(item.Value, _items.Count - 1);
+
+        if (_isHashMapEnabled) UpdateHashMap(item.Value, _items.Count - 1);
+
         BubbleUp(_items.IndexOf(item));
     }
 
@@ -140,7 +180,9 @@ public sealed class BinaryMaxHeap
     {
         var lastItem = _items.Last();
         _items.Remove(lastItem);
-        DeleteFromHashMap(lastItem.Value);
+
+        if (_isHashMapEnabled) DeleteFromHashMap(lastItem.Value);
+
         return lastItem;
     }
 
@@ -175,7 +217,13 @@ public sealed class BinaryMaxHeap
 
     private int GetIndex(PriorityQueueItem item)
     {
-        return GetIndexFromHashMap(item.Value);
+        if (_isHashMapEnabled)
+        {
+            return GetIndexFromHashMap(item.Value);
+        }
+
+        var foundItem = _items.FirstOrDefault(i => i.Value.Equals(item.Value));
+        return foundItem is null ? -1 : _items.IndexOf(foundItem);
     }
 
     /// <summary>
