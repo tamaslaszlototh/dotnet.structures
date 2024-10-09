@@ -23,6 +23,15 @@ public class PriorityQueueItem
             Value = value
         };
     }
+    
+    public PriorityQueueItem DeepCopy()
+    {
+        return new PriorityQueueItem
+        {
+            Priority = Priority,
+            Value = Value
+        };
+    }
 
     private PriorityQueueItem()
     {

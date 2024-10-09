@@ -288,4 +288,94 @@ public class BinaryMaxHeapTests
         Assert.That(topItem, Is.Not.Null);
         Assert.That(topItem.Priority, Is.EqualTo(30));
     }
+    
+    [Test]
+    public void Heapify_ShouldAddListToHeapInOrder_WithHashMap()
+    {
+        // Arrange
+        var items = new List<PriorityQueueItem>
+        {
+            PriorityQueueItem.Create(10, "Item1"),
+            PriorityQueueItem.Create(30, "Item2"),
+            PriorityQueueItem.Create(20, "Item3"),
+            PriorityQueueItem.Create(25, "Item4")
+        };
+
+        // Act
+        _heap.Heapify(items);
+
+        // Assert
+        var topItem = _heap.Peek();
+        Assert.That(topItem, Is.Not.Null);
+        Assert.That(topItem.Value, Is.EqualTo("Item2"));
+        Assert.That(_heap.Count, Is.EqualTo(4));
+    }
+    
+    [Test]
+    public void Heapify_ShouldAddListToHeapInOrder_WithoutHashMap()
+    {
+        // Arrange
+        var items = new List<PriorityQueueItem>
+        {
+            PriorityQueueItem.Create(10, "Item1"),
+            PriorityQueueItem.Create(30, "Item2"),
+            PriorityQueueItem.Create(20, "Item3"),
+            PriorityQueueItem.Create(25, "Item4")
+        };
+
+        // Act
+        _heapWithHashMapDisabled.Heapify(items);
+
+        // Assert
+        var topItem = _heapWithHashMapDisabled.Peek();
+        Assert.That(topItem, Is.Not.Null);
+        Assert.That(topItem.Value, Is.EqualTo("Item2"));
+        Assert.That(_heapWithHashMapDisabled.Count, Is.EqualTo(4));
+    }
+    
+    [Test]
+    public void Heapify_ShouldPreventValueChange_WithHashMap()
+    {
+        // Arrange
+        var items = new List<PriorityQueueItem>
+        {
+            PriorityQueueItem.Create(10, "Item1"),
+            PriorityQueueItem.Create(30, "Item2"),
+            PriorityQueueItem.Create(20, "Item3"),
+            PriorityQueueItem.Create(25, "Item4")
+        };
+
+        // Act
+        _heap.Heapify(items);
+        items[1].Value = "Modified";
+
+        // Assert
+        var topItem = _heap.Peek();
+        Assert.That(topItem, Is.Not.Null);
+        Assert.That(topItem.Value, Is.EqualTo("Item2"));
+        Assert.That(_heap.Count, Is.EqualTo(4));
+    }
+    
+    [Test]
+    public void Heapify_ShouldPreventValueChange_WithoutHashMap()
+    {
+        // Arrange
+        var items = new List<PriorityQueueItem>
+        {
+            PriorityQueueItem.Create(10, "Item1"),
+            PriorityQueueItem.Create(30, "Item2"),
+            PriorityQueueItem.Create(20, "Item3"),
+            PriorityQueueItem.Create(25, "Item4")
+        };
+
+        // Act
+        _heapWithHashMapDisabled.Heapify(items);
+        items[1].Value = "Modified";
+
+        // Assert
+        var topItem = _heapWithHashMapDisabled.Peek();
+        Assert.That(topItem, Is.Not.Null);
+        Assert.That(topItem.Value, Is.EqualTo("Item2"));
+        Assert.That(_heapWithHashMapDisabled.Count, Is.EqualTo(4));
+    }
 }

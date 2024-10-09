@@ -20,7 +20,7 @@ namespace DotNet.DataStructures.PriorityQueues;
 /// </example>
 public sealed class BinaryMaxHeap
 {
-    private readonly List<PriorityQueueItem> _items = [];
+    private List<PriorityQueueItem> _items = [];
     private readonly Dictionary<object, int> _hashMap = [];
     private readonly bool _isHashMapEnabled = true;
 
@@ -249,5 +249,37 @@ public sealed class BinaryMaxHeap
     public int Count()
     {
         return _items.Count;
+    }
+
+    /// <summary>
+    /// Builds a max-heap from the specified list of <see cref="PriorityQueueItem"/> elements.
+    /// </summary>
+    /// <param name="items">
+    /// A list of <see cref="PriorityQueueItem"/> elements to be arranged into a max-heap structure.
+    /// The heap property will be enforced for all elements in the list.
+    /// </param>
+    /// <example>
+    /// Example of using the <see cref="Heapify"/> method:
+    /// <code>
+    /// var items = new List&lt;PriorityQueueItem&gt; 
+    /// {
+    ///     new PriorityQueueItem(10, ...),
+    ///     new PriorityQueueItem(5, ...),
+    ///     new PriorityQueueItem(20, ...)
+    /// };
+    /// heap.Heapify(items);
+    /// </code>
+    /// </example>
+    public void Heapify(List<PriorityQueueItem> items)
+    {
+        _items = items.Select(p => p.DeepCopy()).ToList();
+
+        var index = (items.Count - 1) / 2;
+        while (index >= 0)
+        {
+            PushDown(index);
+            if (index == 0) break;
+            index = index / 2;
+        }
     }
 }
