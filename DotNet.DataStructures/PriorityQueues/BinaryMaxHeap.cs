@@ -252,14 +252,13 @@ public sealed class BinaryMaxHeap
     }
 
     /// <summary>
-    /// Builds a max-heap from the specified list of <see cref="PriorityQueueItem"/> elements.
+    /// Builds a max-heap from the specified list of <see cref="PriorityQueueItem"/> elements with deep copy of the list.
     /// </summary>
     /// <param name="items">
     /// A list of <see cref="PriorityQueueItem"/> elements to be arranged into a max-heap structure.
-    /// The heap property will be enforced for all elements in the list.
     /// </param>
     /// <example>
-    /// Example of using the <see cref="Heapify"/> method:
+    /// Example of using the <see cref="HeapifyDeep"/> method:
     /// <code>
     /// var items = new List&lt;PriorityQueueItem&gt; 
     /// {
@@ -270,9 +269,40 @@ public sealed class BinaryMaxHeap
     /// heap.Heapify(items);
     /// </code>
     /// </example>
-    public void Heapify(List<PriorityQueueItem> items)
+    public void HeapifyDeep(List<PriorityQueueItem> items)
     {
         _items = items.Select(p => p.DeepCopy()).ToList();
+
+        var index = (items.Count - 1) / 2;
+        while (index >= 0)
+        {
+            PushDown(index);
+            if (index == 0) break;
+            index = index / 2;
+        }
+    }
+
+    /// <summary>
+    /// Builds a max-heap from the specified list of <see cref="PriorityQueueItem"/> elements with shallow copy of the list.
+    /// </summary>
+    /// <param name="items">
+    /// A list of <see cref="PriorityQueueItem"/> elements to be arranged into a max-heap structure.
+    /// </param>
+    /// <example>
+    /// Example of using the <see cref="HeapifyDeep"/> method:
+    /// <code>
+    /// var items = new List&lt;PriorityQueueItem&gt; 
+    /// {
+    ///     new PriorityQueueItem(10, ...),
+    ///     new PriorityQueueItem(5, ...),
+    ///     new PriorityQueueItem(20, ...)
+    /// };
+    /// heap.Heapify(items);
+    /// </code>
+    /// </example>
+    public void HeapifyShallow(List<PriorityQueueItem> items)
+    {
+        _items = items;
 
         var index = (items.Count - 1) / 2;
         while (index >= 0)
