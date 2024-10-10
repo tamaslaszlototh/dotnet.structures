@@ -18,19 +18,14 @@ namespace DotNet.DataStructures.PriorityQueues;
 /// var peekItem = heap.Peek(); // Retrieves but does not remove the top item
 /// </code>
 /// </example>
-public sealed class BinaryMinHeap
+public sealed class BinaryMinHeap : HeapBase
 {
-    private List<PriorityQueueItem> _items = [];
-    private readonly Dictionary<object, int> _hashMap = [];
-    private readonly bool _isHashMapEnabled = true;
-
     private BinaryMinHeap()
     {
     }
 
-    private BinaryMinHeap(HeapOptions options)
+    private BinaryMinHeap(HeapOptions options) : base(options)
     {
-        _isHashMapEnabled = options.IsHashMapEnabled;
     }
 
     /// <summary>
@@ -52,7 +47,7 @@ public sealed class BinaryMinHeap
     /// </example>
     /// <remarks>BinaryMinHeap uses hashMap by default to make search faster, but this can be disabled.
     /// </remarks>
-    public static BinaryMinHeap Create(Action<HeapOptions>? optionsBuilder = null)
+    internal static BinaryMinHeap Create(Action<HeapOptions>? optionsBuilder = null)
     {
         if (optionsBuilder is null)
         {
@@ -66,56 +61,56 @@ public sealed class BinaryMinHeap
 
     private void UpdateHashMap(object value, int newIndex)
     {
-        _hashMap[value] = newIndex;
+        HashMap[value] = newIndex;
     }
 
     private void DeleteFromHashMap(object value)
     {
-        _hashMap.Remove(value);
+        HashMap.Remove(value);
     }
 
     private int GetIndexFromHashMap(object value)
     {
-        var isFound = _hashMap.TryGetValue(value, out int index);
+        var isFound = HashMap.TryGetValue(value, out int index);
         return isFound ? index : -1;
     }
 
     private void BubbleUp(int index)
     {
-        PriorityQueueItem current = _items[index];
+        PriorityQueueItem current = Items[index];
         while (index > 0)
         {
             var parentIndex = GetParentIndex(index);
-            if (_items[parentIndex].Priority < current.Priority) break;
+            if (Items[parentIndex].Priority < current.Priority) break;
 
-            if (_isHashMapEnabled) UpdateHashMap(_items[parentIndex].Value, index);
+            if (IsHashMapEnabled) UpdateHashMap(Items[parentIndex].Value, index);
 
-            _items[index] = _items[parentIndex];
+            Items[index] = Items[parentIndex];
             index = parentIndex;
         }
 
-        if (_isHashMapEnabled) UpdateHashMap(current.Value, index);
+        if (IsHashMapEnabled) UpdateHashMap(current.Value, index);
 
-        _items[index] = current;
+        Items[index] = current;
     }
 
     private void PushDown(int index)
     {
-        PriorityQueueItem current = _items[index];
+        PriorityQueueItem current = Items[index];
         while (HasChildren(index))
         {
             var highestPriorityChild = GetHighestPriorityChild(index);
             if (highestPriorityChild.Child.Priority > current.Priority) break;
 
-            if (_isHashMapEnabled) UpdateHashMap(highestPriorityChild.Child.Value, index);
+            if (IsHashMapEnabled) UpdateHashMap(highestPriorityChild.Child.Value, index);
 
-            _items[index] = highestPriorityChild.Child;
+            Items[index] = highestPriorityChild.Child;
             index = highestPriorityChild.Index;
         }
 
-        if (_isHashMapEnabled) UpdateHashMap(current.Value, index);
+        if (IsHashMapEnabled) UpdateHashMap(current.Value, index);
 
-        _items[index] = current;
+        Items[index] = current;
     }
 
     private static int GetParentIndex(int index)
@@ -125,7 +120,7 @@ public sealed class BinaryMinHeap
 
     private bool HasChildren(int index)
     {
-        var firstChild = _items.ElementAtOrDefault(index * 2 + 1);
+        var firstChild = Items.ElementAtOrDefault(index * 2 + 1);
         return firstChild is not null;
     }
 
@@ -134,8 +129,8 @@ public sealed class BinaryMinHeap
         var firstChildIndex = index * 2 + 1;
         var secondChildIndex = (index + 1) * 2;
 
-        var firstChild = _items.ElementAt(firstChildIndex);
-        var secondChild = _items.ElementAtOrDefault(secondChildIndex);
+        var firstChild = Items.ElementAt(firstChildIndex);
+        var secondChild = Items.ElementAtOrDefault(secondChildIndex);
 
         if (secondChild is null) return (firstChildIndex, firstChild);
 
@@ -148,11 +143,11 @@ public sealed class BinaryMinHeap
     /// Inserts a <see cref="PriorityQueueItem"/> item into the BinaryMinHeap.
     /// </summary>
     /// <param name="item">The <see cref="PriorityQueueItem"/> item to be inserted into the BinaryMinHeap.</param>
-    public void Insert(PriorityQueueItem item)
+    public override void Insert(PriorityQueueItem item)
     {
-        _items.Add(item);
-        if (_isHashMapEnabled) UpdateHashMap(item.Value, _items.Count - 1);
-        BubbleUp(_items.IndexOf(item));
+        Items.Add(item);
+        if (IsHashMapEnabled) UpdateHashMap(item.Value, Items.Count - 1);
+        BubbleUp(Items.IndexOf(item));
     }
 
     /// <summary>
@@ -161,24 +156,24 @@ public sealed class BinaryMinHeap
     /// <returns>
     /// The <see cref="PriorityQueueItem"/> item at the top of the BinaryMinHeap, or <c>null</c> if the BinaryMinHeap is empty.
     /// </returns>
-    public PriorityQueueItem? Top()
+    public override PriorityQueueItem? Top()
     {
-        if (_items.Count == 0) return null;
+        if (Items.Count == 0) return null;
 
         var lastItem = RemoveLastItem();
-        if (_items.Count == 0) return lastItem;
+        if (Items.Count == 0) return lastItem;
 
-        var firstItem = _items.First();
-        _items[0] = lastItem;
+        var firstItem = Items.First();
+        Items[0] = lastItem;
         PushDown(0);
         return firstItem;
     }
 
     private PriorityQueueItem RemoveLastItem()
     {
-        var lastItem = _items.Last();
-        _items.Remove(lastItem);
-        if (_isHashMapEnabled) DeleteFromHashMap(lastItem.Value);
+        var lastItem = Items.Last();
+        Items.Remove(lastItem);
+        if (IsHashMapEnabled) DeleteFromHashMap(lastItem.Value);
         return lastItem;
     }
 
@@ -189,7 +184,7 @@ public sealed class BinaryMinHeap
     /// <remarks>
     /// If the <see cref="PriorityQueueItem"/> item does not exist in the BinaryMinHeap, it is inserted as a new <see cref="PriorityQueueItem"/> item.
     /// </remarks>
-    public void Update(PriorityQueueItem item)
+    public override void Update(PriorityQueueItem item)
     {
         var index = GetIndex(item);
         if (index < 0)
@@ -198,8 +193,8 @@ public sealed class BinaryMinHeap
         }
         else
         {
-            var oldPriority = _items[index].Priority;
-            _items[index] = item;
+            var oldPriority = Items[index].Priority;
+            Items[index] = item;
             if (item.Priority < oldPriority)
             {
                 BubbleUp(index);
@@ -213,13 +208,13 @@ public sealed class BinaryMinHeap
 
     private int GetIndex(PriorityQueueItem item)
     {
-        if (_isHashMapEnabled)
+        if (IsHashMapEnabled)
         {
             return GetIndexFromHashMap(item.Value);
         }
 
-        var foundItem = _items.FirstOrDefault(i => i.Value.Equals(item.Value));
-        return foundItem is null ? -1 : _items.IndexOf(foundItem);
+        var foundItem = Items.FirstOrDefault(i => i.Value.Equals(item.Value));
+        return foundItem is null ? -1 : Items.IndexOf(foundItem);
     }
 
     /// <summary>
@@ -231,9 +226,9 @@ public sealed class BinaryMinHeap
     /// <remarks>
     /// The <see cref="PriorityQueueItem"/> item still remains in the BinaryMinHeap.
     /// </remarks>
-    public PriorityQueueItem? Peek()
+    public override PriorityQueueItem? Peek()
     {
-        return _items.FirstOrDefault();
+        return Items.FirstOrDefault();
     }
 
     /// <summary>
@@ -242,9 +237,9 @@ public sealed class BinaryMinHeap
     /// <returns>
     /// The number of items in the BinaryMinHeap.
     /// </returns>
-    public int Count()
+    public override int Count()
     {
-        return _items.Count;
+        return Items.Count;
     }
 
     /// <summary>
@@ -265,9 +260,9 @@ public sealed class BinaryMinHeap
     /// heap.Heapify(items);
     /// </code>
     /// </example>
-    public void HeapifyDeep(List<PriorityQueueItem> items)
+    public override void HeapifyDeep(List<PriorityQueueItem> items)
     {
-        _items = items.Select(p => p.DeepCopy()).ToList();
+        Items = items.Select(p => p.DeepCopy()).ToList();
 
         var index = (items.Count - 1) / 2;
         while (index >= 0)
@@ -296,9 +291,9 @@ public sealed class BinaryMinHeap
     /// heap.Heapify(items);
     /// </code>
     /// </example>
-    public void HeapifyShallow(List<PriorityQueueItem> items)
+    public override void HeapifyShallow(List<PriorityQueueItem> items)
     {
-        _items = items;
+        Items = items;
 
         var index = (items.Count - 1) / 2;
         while (index >= 0)

@@ -5,14 +5,14 @@ namespace DotNet.Structures.Tests.PriorityQueuesTests;
 [TestFixture]
 public class BinaryMinHeapTests
 {
-    private BinaryMinHeap _heap;
-    private BinaryMinHeap _heapWithHashMapDisabled;
+    private HeapBase _heap;
+    private HeapBase _heapWithHashMapDisabled;
 
     [SetUp]
     public void SetUp()
     {
-        _heap = BinaryMinHeap.Create();
-        _heapWithHashMapDisabled = BinaryMinHeap.Create(options => options.DisableHashMap());
+        _heap = PriorityQueueFactory.CreateBinaryMinHeap();
+        _heapWithHashMapDisabled = PriorityQueueFactory.CreateBinaryMinHeap(options => options.DisableHashMap());
     }
 
     [Test]
@@ -378,7 +378,7 @@ public class BinaryMinHeapTests
         Assert.That(topItem.Value, Is.EqualTo("Item1"));
         Assert.That(_heapWithHashMapDisabled.Count, Is.EqualTo(4));
     }
-    
+
     [Test]
     public void HeapifyShallow_ShouldAddListToHeapInOrder_WithHashMap()
     {

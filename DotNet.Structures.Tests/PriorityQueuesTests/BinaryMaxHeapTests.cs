@@ -5,14 +5,14 @@ namespace DotNet.Structures.Tests.PriorityQueuesTests;
 [TestFixture]
 public class BinaryMaxHeapTests
 {
-    private BinaryMaxHeap _heap;
-    private BinaryMaxHeap _heapWithHashMapDisabled;
+    private HeapBase _heap;
+    private HeapBase _heapWithHashMapDisabled;
 
     [SetUp]
     public void SetUp()
     {
-        _heap = BinaryMaxHeap.Create();
-        _heapWithHashMapDisabled = BinaryMaxHeap.Create(options => options.DisableHashMap());
+        _heap = PriorityQueueFactory.CreateBinaryMaxHeap();
+        _heapWithHashMapDisabled = PriorityQueueFactory.CreateBinaryMaxHeap(options => options.DisableHashMap());
     }
 
     [Test]
@@ -288,7 +288,7 @@ public class BinaryMaxHeapTests
         Assert.That(topItem, Is.Not.Null);
         Assert.That(topItem.Priority, Is.EqualTo(30));
     }
-    
+
     [Test]
     public void HeapifyDeep_ShouldAddListToHeapInOrder_WithHashMap()
     {
@@ -310,7 +310,7 @@ public class BinaryMaxHeapTests
         Assert.That(topItem.Value, Is.EqualTo("Item2"));
         Assert.That(_heap.Count, Is.EqualTo(4));
     }
-    
+
     [Test]
     public void HeapifyDeep_ShouldAddListToHeapInOrder_WithoutHashMap()
     {
@@ -332,7 +332,7 @@ public class BinaryMaxHeapTests
         Assert.That(topItem.Value, Is.EqualTo("Item2"));
         Assert.That(_heapWithHashMapDisabled.Count, Is.EqualTo(4));
     }
-    
+
     [Test]
     public void HeapifyDeep_ShouldPreventValueChange_WithHashMap()
     {
@@ -355,7 +355,7 @@ public class BinaryMaxHeapTests
         Assert.That(topItem.Value, Is.EqualTo("Item2"));
         Assert.That(_heap.Count, Is.EqualTo(4));
     }
-    
+
     [Test]
     public void HeapifyDeep_ShouldPreventValueChange_WithoutHashMap()
     {
@@ -378,7 +378,7 @@ public class BinaryMaxHeapTests
         Assert.That(topItem.Value, Is.EqualTo("Item2"));
         Assert.That(_heapWithHashMapDisabled.Count, Is.EqualTo(4));
     }
-    
+
     [Test]
     public void HeapifyShallow_ShouldAddListToHeapInOrder_WithHashMap()
     {
@@ -400,7 +400,7 @@ public class BinaryMaxHeapTests
         Assert.That(topItem.Value, Is.EqualTo("Item2"));
         Assert.That(_heap.Count, Is.EqualTo(4));
     }
-    
+
     [Test]
     public void HeapifyShallow_ShouldAddListToHeapInOrder_WithoutHashMap()
     {
